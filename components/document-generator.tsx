@@ -33,6 +33,26 @@ export default function DocumentGenerator() {
   const [hasFirestoreAccess, setHasFirestoreAccess] = useState<boolean | null>(null)
   const { user, logout } = useAuth()
 
+  // Create debounced function for GitHub link updates
+  const debouncedUpdateGithubLink = useCallback(
+    debounce((id: string, value: string) => {
+      setExperiments(experiments => 
+        experiments.map(exp => 
+          exp.id === id ? { ...exp, githubLink: value } : exp
+        )
+      );
+      console.log("Updated GitHub link, will auto-save...")
+    }, 1000), // 1 second delay
+    []
+  )
+
+  // Clean up debounce on unmount
+  useEffect(() => {
+    return () => {
+      debouncedUpdateGithubLink.cancel()
+    }
+  }, [debouncedUpdateGithubLink])
+
   // Auto-save function with debouncing
   const autoSave = useCallback(
     debounce(async () => {
@@ -98,8 +118,12 @@ export default function DocumentGenerator() {
   }
 
   const updateExperiment = (id: string, field: keyof Experiment, value: string) => {
-    setExperiments(experiments.map((exp) => (exp.id === id ? { ...exp, [field]: value } : exp)))
-    console.log("Updated experiment, will auto-save...")
+    if (field === 'githubLink') {
+      debouncedUpdateGithubLink(id, value)
+    } else {
+      setExperiments(experiments.map(exp => (exp.id === id ? { ...exp, [field]: value } : exp)))
+      console.log("Updated experiment, will auto-save...")
+    }
   }
 
   const saveToHistoryOnDownload = async (): Promise<boolean> => {

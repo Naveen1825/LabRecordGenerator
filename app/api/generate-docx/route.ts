@@ -30,6 +30,9 @@ export async function POST(request: NextRequest) {
 
     // Create document
     const doc = new docx.Document({
+      creator: "Lab Record Generator",
+      title: `${courseTitle} - Table of Contents`,
+      description: `Lab Record for ${studentName} (${registerNumber})`,
       sections: [
         {
           properties: {
@@ -56,6 +59,7 @@ export async function POST(request: NextRequest) {
                     width: 500,
                     height: 125,
                   },
+                  type: "png"
                 }),
               ],
             }),
@@ -438,6 +442,11 @@ function createQRCodeCell(buffer: ArrayBuffer | undefined, docx: any, widthPerce
                   width: 80,
                   height: 80,
                 },
+                type: "png",
+                alt: {
+                  text: "QR Code",
+                  name: "QR Code"
+                }
               }),
             ]
           : [new docx.TextRun("")],
