@@ -33,26 +33,6 @@ export default function DocumentGenerator() {
   const [hasFirestoreAccess, setHasFirestoreAccess] = useState<boolean | null>(null)
   const { user, logout } = useAuth()
 
-  // Create debounced function for GitHub link updates
-  const debouncedUpdateGithubLink = useCallback(
-    debounce((id: string, value: string) => {
-      setExperiments(experiments => 
-        experiments.map(exp => 
-          exp.id === id ? { ...exp, githubLink: value } : exp
-        )
-      );
-      console.log("Updated GitHub link, will auto-save...")
-    }, 1000), // 1 second delay
-    []
-  )
-
-  // Clean up debounce on unmount
-  useEffect(() => {
-    return () => {
-      debouncedUpdateGithubLink.cancel()
-    }
-  }, [debouncedUpdateGithubLink])
-
   // Auto-save function with debouncing
   const autoSave = useCallback(
     debounce(async () => {
@@ -118,12 +98,8 @@ export default function DocumentGenerator() {
   }
 
   const updateExperiment = (id: string, field: keyof Experiment, value: string) => {
-    if (field === 'githubLink') {
-      debouncedUpdateGithubLink(id, value)
-    } else {
-      setExperiments(experiments.map(exp => (exp.id === id ? { ...exp, [field]: value } : exp)))
-      console.log("Updated experiment, will auto-save...")
-    }
+    setExperiments(experiments.map(exp => (exp.id === id ? { ...exp, [field]: value } : exp)))
+    console.log("Updated experiment, will auto-save...")
   }
 
   const saveToHistoryOnDownload = async (): Promise<boolean> => {
@@ -472,13 +448,14 @@ export default function DocumentGenerator() {
                       <Label htmlFor={`github-${experiment.id}`} className="text-gray-700">
                         GitHub Link
                       </Label>
-                      <Input
+                      <input
+                        type="text"
                         id={`github-${experiment.id}`}
                         value={experiment.githubLink}
                         onChange={(e) => updateExperiment(experiment.id, "githubLink", e.target.value)}
-                        placeholder="https://github.com/username/repository"
+                        placeholder="Enter GitHub repository link"
                         required
-                        className="border-gray-400 focus:border-purple-500 focus:ring-purple-200"
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border-gray-400 focus:border-purple-500 focus:ring-purple-200"
                       />
                     </div>
                   </div>
