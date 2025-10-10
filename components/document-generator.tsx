@@ -206,49 +206,6 @@ export default function DocumentGenerator() {
     }
   }
 
-  const handleDownloadPdf = async () => {
-    try {
-      setIsGenerating(true)
-      setSaveError("")
-
-      const response = await fetch("/api/generate-pdf", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          courseTitle,
-          experiments,
-          studentName,
-          registerNumber,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to generate PDF")
-      }
-
-      const blob = await response.blob()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = `${courseTitle.replace(/[^a-zA-Z0-9]/g, "_")}_Lab_Record.pdf`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
-
-      saveToHistoryOnDownload().catch((error) => {
-        console.warn("Could not save to history:", error)
-      })
-    } catch (error) {
-      console.error("Error generating PDF:", error)
-      alert("There was an error generating your PDF. Please try again.")
-    } finally {
-      setIsGenerating(false)
-    }
-  }
-
   const loadFromHistory = (record: DocumentRecord) => {
     setCourseTitle(record.courseTitle)
     setStudentName(record.studentName)
@@ -487,17 +444,9 @@ export default function DocumentGenerator() {
           <Button
             onClick={handleDownloadDocx}
             disabled={!isFormValid() || isGenerating}
-            className="bg-pink-400 hover:bg-pink-500 text-white"
+            className="bg-pink-400 hover:bg-pink-500 text-white col-span-2"
           >
-            Download DOCX
-          </Button>
-
-          <Button
-            onClick={handleDownloadPdf}
-            disabled={!isFormValid() || isGenerating}
-            className="bg-purple-500 hover:bg-purple-600 text-white"
-          >
-            Download PDF
+            {isGenerating ? "Generating..." : "Download DOCX"}
           </Button>
         </div>
 
