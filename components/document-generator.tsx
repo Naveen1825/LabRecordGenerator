@@ -98,7 +98,7 @@ export default function DocumentGenerator() {
   }
 
   const updateExperiment = (id: string, field: keyof Experiment, value: string) => {
-    setExperiments(experiments.map((exp) => (exp.id === id ? { ...exp, [field]: value } : exp)))
+    setExperiments(experiments.map(exp => (exp.id === id ? { ...exp, [field]: value } : exp)))
     console.log("Updated experiment, will auto-save...")
   }
 
@@ -201,49 +201,6 @@ export default function DocumentGenerator() {
     } catch (error) {
       console.error("Error generating DOCX:", error)
       alert("There was an error generating your document. Please try again.")
-    } finally {
-      setIsGenerating(false)
-    }
-  }
-
-  const handleDownloadPdf = async () => {
-    try {
-      setIsGenerating(true)
-      setSaveError("")
-
-      const response = await fetch("/api/generate-pdf", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          courseTitle,
-          experiments,
-          studentName,
-          registerNumber,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to generate PDF")
-      }
-
-      const blob = await response.blob()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = `${courseTitle.replace(/[^a-zA-Z0-9]/g, "_")}_Lab_Record.pdf`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
-
-      saveToHistoryOnDownload().catch((error) => {
-        console.warn("Could not save to history:", error)
-      })
-    } catch (error) {
-      console.error("Error generating PDF:", error)
-      alert("There was an error generating your PDF. Please try again.")
     } finally {
       setIsGenerating(false)
     }
@@ -448,13 +405,14 @@ export default function DocumentGenerator() {
                       <Label htmlFor={`github-${experiment.id}`} className="text-gray-700">
                         GitHub Link
                       </Label>
-                      <Input
+                      <input
+                        type="text"
                         id={`github-${experiment.id}`}
                         value={experiment.githubLink}
                         onChange={(e) => updateExperiment(experiment.id, "githubLink", e.target.value)}
-                        placeholder="https://github.com/username/repository"
+                        placeholder="Enter GitHub repository link"
                         required
-                        className="border-gray-400 focus:border-purple-500 focus:ring-purple-200"
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border-gray-400 focus:border-purple-500 focus:ring-purple-200"
                       />
                     </div>
                   </div>
@@ -486,17 +444,9 @@ export default function DocumentGenerator() {
           <Button
             onClick={handleDownloadDocx}
             disabled={!isFormValid() || isGenerating}
-            className="bg-pink-400 hover:bg-pink-500 text-white"
+            className="bg-pink-400 hover:bg-pink-500 text-white col-span-2"
           >
-            Download DOCX
-          </Button>
-
-          <Button
-            onClick={handleDownloadPdf}
-            disabled={!isFormValid() || isGenerating}
-            className="bg-purple-500 hover:bg-purple-600 text-white"
-          >
-            Download PDF
+            {isGenerating ? "Generating..." : "Download DOCX"}
           </Button>
         </div>
 

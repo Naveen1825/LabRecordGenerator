@@ -121,7 +121,7 @@ export default function DocumentHistory({ onLoadRecord }: DocumentHistoryProps) 
 
       console.log("Downloading PDF for record:", record.id)
 
-      const response = await fetch("/api/generate-pdf", {
+      const response = await fetch("/api/generate-docx", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -142,7 +142,7 @@ export default function DocumentHistory({ onLoadRecord }: DocumentHistoryProps) 
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
-      a.download = `${record.courseTitle.replace(/[^a-zA-Z0-9]/g, "_")}_Lab_Record.pdf`
+      a.download = `${record.courseTitle.replace(/[^a-zA-Z0-9]/g, "_")}_Lab_Record.docx`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -363,7 +363,7 @@ export default function DocumentHistory({ onLoadRecord }: DocumentHistoryProps) 
                         ) : (
                           <>
                             <Download className="h-4 w-4 mr-1" />
-                            Download PDF
+                            Download Word
                           </>
                         )}
                       </Button>
